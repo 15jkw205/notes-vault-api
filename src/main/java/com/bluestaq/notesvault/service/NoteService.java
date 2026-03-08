@@ -4,7 +4,6 @@ import com.bluestaq.notesvault.model.Note;
 import com.bluestaq.notesvault.repository.NoteRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class NoteService {
@@ -17,5 +16,9 @@ public class NoteService {
 
     public Note createNote(Note note) {
         return noteRepository.save(note);
+    }
+
+    public List<Note> getAllNotes() {
+        return noteRepository.findAll();
     }
 }
