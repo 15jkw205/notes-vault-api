@@ -5,6 +5,7 @@ import com.bluestaq.notesvault.service.NoteService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/notes")
@@ -23,5 +24,11 @@ public class NoteController {
         }
         Note created = noteService.createNote(note);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Note>> getAllNotes() {
+        List<Note> notes = noteService.getAllNotes();
+        return ResponseEntity.ok(notes);
     }
 }
