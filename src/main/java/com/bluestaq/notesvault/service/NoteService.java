@@ -4,6 +4,7 @@ import com.bluestaq.notesvault.model.Note;
 import com.bluestaq.notesvault.repository.NoteRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class NoteService {
@@ -20,5 +21,10 @@ public class NoteService {
 
     public List<Note> getAllNotes() {
         return noteRepository.findAll();
+    }
+
+    public Note getNoteById(UUID id) {
+        return noteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Note not found with id: " + id));
     }
 }
