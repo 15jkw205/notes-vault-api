@@ -26,16 +26,29 @@ down through each layer to the database.
 
 ## Tech Choices
 
-### Java and Spring Boot
-Java is the primary language for this project. Spring Boot makes it 
-straightforward to build a production-ready REST API without a lot of 
-boilerplate setup. It comes with everything needed out of the box — 
-a web server, dependency injection, and data access tools — which lets 
-me focus on writing clean, well structured code rather than configuration.
-Java and Spring Boot are what I am most comfortable with, and they have 
-been a consistent part of my journey from UCCS Web Services to Parsons 
-and across various personal projects. It is a reliable backend setup that 
-I have genuinely come to enjoy and appreciate the more I work with it.
+### Java
+Java is the primary language for this project. It is what I am most 
+comfortable with and has been a consistent part of my journey from UCCS 
+Web Services to Parsons and across various personal projects. It is a 
+reliable, battle tested language that I have genuinely come to enjoy and 
+appreciate the more I work with it.
+
+### Spring Boot 3.4.3
+Spring Boot makes it straightforward to build a production-ready REST API 
+without a lot of boilerplate setup. It comes with everything needed out 
+of the box — a web server, dependency injection, and data access tools — 
+which lets me focus on writing clean, well structured code rather than 
+configuration.
+
+Spring Boot 3.4.3 was chosen over 4.0.3 deliberately. While Spring Boot 
+4.0.3 is now a stable release, it introduced significant breaking changes 
+from the 3.x line including renamed dependencies, restructured 
+auto-configuration, and a required migration path through 3.5 first. For 
+a project built to demonstrate clean, reliable backend fundamentals, 3.4.3 
+represents the most stable and widely documented foundation with full 
+ecosystem compatibility. Migrating to Spring Boot 4.x is on the roadmap 
+as a future enhancement once the broader ecosystem fully stabilizes around 
+the 4.x line.
 
 ### PostgreSQL
 PostgreSQL is a reliable, production grade relational database. The notes 
