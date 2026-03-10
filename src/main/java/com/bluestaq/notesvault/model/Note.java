@@ -1,6 +1,8 @@
 package com.bluestaq.notesvault.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -12,6 +14,8 @@ public class Note {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @NotBlank(message = "Content cannot be blank")
+    @Size(max = 500, message = "Content cannot exceed 500 characters")
     @Column(nullable = false)
     private String content;
 
