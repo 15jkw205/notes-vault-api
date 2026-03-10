@@ -1,105 +1,215 @@
 # Notes Vault API
 
-A lightweight backend service for creating, viewing, and deleting notes.
-Built with Java and Spring Boot, backed by PostgreSQL, and containerized
-with Docker.
+A RESTful API for creating, retrieving, updating, and deleting notes. Built with Java 21 and Spring Boot 4.0.3, backed by PostgreSQL, and fully containerized with Docker and Docker Compose.
+
+This project was developed as a software engineering challenge, following an agile workflow with GitHub issues, feature branches, and pull requests.
+
+![Architecture Diagram](docs/architecture.png)
 
 ---
 
-## System Architecture
+## System Overview
 
-The diagram below shows how the system is structured from the client
-down through each layer to the database.
+The Notes Vault API follows a standard three-layer Spring Boot architecture:
 
-![System Architecture](docs/architecture.png)
+- **Controller** — handles HTTP requests and responses
+- **Service** — contains all business logic
+- **Repository** — manages database access via Spring Data JPA
 
-### How it works
-
-- The **Client** sends HTTP requests to the API
-- The **Controller** receives the request and delegates to the service
-- The **Service** contains the business logic and calls the repository
-- The **Repository** handles all database operations via Spring Data JPA
-- The **Model** defines what a Note looks like in the database
-- **PostgreSQL** persists the data in the `notes_vault` database
+All errors are handled centrally by a `GlobalExceptionHandler` and return structured JSON responses with a status code, message, and timestamp.
 
 ---
 
 ## Tech Choices
 
-### Java
-Java is the primary language for this project. It is what I am most 
-comfortable with and has been a consistent part of my journey from UCCS 
-Web Services to Parsons and across various personal projects. It is a 
-reliable, battle tested language that I have genuinely come to enjoy and 
-appreciate the more I work with it.
+| Technology | Reason |
+|------------|--------|
+| Java 21 | LTS release with modern language features |
+| Spring Boot 4.0.3 | Industry standard for building production-grade REST APIs |
+| Spring Data JPA | Eliminates boilerplate database code via repository pattern |
+| PostgreSQL 16 | Robust relational database — chosen over H2 to reflect real-world usage |
+| Docker & Docker Compose | Single-command setup, portable across any environment |
+| Maven | Standard Java build tool with reliable dependency management |
+| JUnit 5 + Mockito | Two-layer test coverage — API level and service level |
+| Spring Boot Actuator | Production-ready health check endpoint out of the box |
 
-### Spring Boot 3.4.3
-Spring Boot makes it straightforward to build a production-ready REST API 
-without a lot of boilerplate setup. It comes with everything needed out 
-of the box — a web server, dependency injection, and data access tools — 
-which lets me focus on writing clean, well structured code rather than 
-configuration.
+---
 
-Spring Boot 3.4.3 was chosen over 4.0.3 deliberately. While Spring Boot 
-4.0.3 is now a stable release, it introduced significant breaking changes 
-from the 3.x line including renamed dependencies, restructured 
-auto-configuration, and a required migration path through 3.5 first. For 
-a project built to demonstrate clean, reliable backend fundamentals, 3.4.3 
-represents the most stable and widely documented foundation with full 
-ecosystem compatibility. Migrating to Spring Boot 4.x is on the roadmap 
-as a future enhancement once the broader ecosystem fully stabilizes around 
-the 4.x line.
+## How to Run
 
-### PostgreSQL
-PostgreSQL is a reliable, production grade relational database. The notes 
-data model is structured and relational by nature, making SQL a natural 
-fit. PostgreSQL is also widely used in production environments and pairs 
-cleanly with Spring Data JPA. It is my favorite database by far — I was 
-first introduced to it professionally at Parsons and FreshBI, and what 
-keeps drawing me back is its consistency and power. In my experience it 
-is a true workhorse in the professional world and I do not see that 
-changing anytime soon.
+### Option 1 - Docker Compose (Recommended)
 
-### Docker and Docker Compose
-Docker ensures the application runs consistently regardless of the machine 
-it is running on. Docker Compose allows the Spring Boot app and PostgreSQL 
-database to be spun up together with a single command, removing any 
-dependency on local environment setup. Containerization is something I 
-have genuinely fallen in love with as a technology. The ability to package 
-an application with all of its dependencies and run it anywhere without 
-friction is remarkable. In my opinion technologies like Docker are a big 
-part of what has driven the explosion of growth in the software world, and 
-I use it with just about everything I build.
+Requires Docker. No local Java or PostgreSQL installation needed.
+```bash
+docker compose up --build
+```
 
-### Maven
-Maven manages the project dependencies and build lifecycle. It keeps 
-dependency management clean and makes the project easy to build and 
-test from the command line with a single command. When working with Java 
-and Spring Boot, Maven is a natural fit. The pom.xml file gives you a 
-clear and organized way to manage dependencies and I have found it to be 
-a solid and dependable tool across every Java project I have worked on.
+The API will be available at `http://localhost:8080`.
+PostgreSQL will be available on host port `5433`.
 
-### GitHub
-GitHub is used for version control and project management throughout this 
-project. All development follows a feature branching workflow where each 
-story has its own branch, pull request, and traceable commit history back 
-to the original issue. This mirrors the collaborative development workflows 
-used on real engineering teams and was an intentional part of how this 
-project was built from day one.
+To stop the containers:
+```bash
+docker compose down
+```
 
-### VS Code
-VS Code is the primary development environment for this project. With the 
-Java Extension Pack and Spring Boot Extension Pack installed it provides 
-real time feedback on annotations, JPA mappings, and test runners that 
-make development faster and more reliable. It is a lightweight but powerful 
-editor that I reach for on most projects.
+### Option 2 - Local Setup
 
-### React (Planned)
-A React frontend is planned as a future enhancement to this project. The 
-goal is to build a simple UI that consumes the Notes Vault API and 
-transforms it into a full stack application. React is the natural choice 
-given its widespread adoption and its ability to connect cleanly to a 
-REST API backend.
+Requires Java 21, Maven, and PostgreSQL running locally.
 
---- 
+**1. Create the database:**
+```bash
+sudo -u postgres psql
+```
+```sql
+CREATE DATABASE notes_vault;
+CREATE USER notes_user WITH PASSWORD 'notes_password';
+GRANT ALL PRIVILEGES ON DATABASE notes_vault TO notes_user;
+\q
+```
 
+**2. Run the application:**
+```bash
+mvn spring-boot:run
+```
+
+The API will be available at `http://localhost:8080`.
+
+### Running the Tests
+
+Tests run against an H2 in-memory database and do not require PostgreSQL or Docker to be running.
+```bash
+mvn test
+```
+
+Tests are intentionally excluded from the Docker build since they run against an isolated H2 database and do not require the Docker stack to be running.
+
+Expected output: `Tests run: 18, Failures: 0, Errors: 0, Skipped: 0`
+
+---
+
+## API Usage
+
+### Base URL
+```
+http://localhost:8080
+```
+
+### Endpoints
+
+#### Create a note
+```bash
+curl -s -X POST http://localhost:8080/notes \
+  -H "Content-Type: application/json" \
+  -d '{"content": "My first note!"}' | jq
+```
+Response: `201 Created`
+```json
+{
+  "id": "e3d2f1a0-...",
+  "content": "My first note!",
+  "createdAt": "2026-03-09T21:00:00"
+}
+```
+
+#### Get all notes
+```bash
+curl -s http://localhost:8080/notes | jq
+```
+Response: `200 OK` — JSON array of all notes
+
+#### Get a note by ID
+```bash
+curl -s http://localhost:8080/notes/{id} | jq
+```
+Response: `200 OK` or `404 Not Found`
+
+#### Update a note
+```bash
+curl -s -X PUT http://localhost:8080/notes/{id} \
+  -H "Content-Type: application/json" \
+  -d '{"content": "Updated content!"}' | jq
+```
+Response: `200 OK` or `404 Not Found`
+
+#### Delete a note
+```bash
+curl -s -X DELETE http://localhost:8080/notes/{id} -w "%{http_code}"
+```
+Response: `204 No Content` or `404 Not Found`
+
+#### Health check
+```bash
+curl -s http://localhost:8080/actuator/health | jq
+```
+Response: `200 OK` with database connectivity status
+
+### Validation
+
+- `content` is required and cannot be blank
+- `content` cannot exceed 500 characters
+- Violations return `400 Bad Request` with a descriptive message
+
+---
+
+## Assumptions and Tradeoffs
+
+**No authentication** - the challenge spec did not require auth. In a
+production system this API would be secured with JWT or OAuth2. This is
+tracked as a future improvement in the backlog.
+
+**No pagination** - `GET /notes` returns all notes. For a production system
+with large datasets, pagination would be essential. This is tracked as a
+future improvement.
+
+**UUID primary keys** - chosen over auto-increment integers for better
+portability, security, and alignment with distributed system patterns.
+
+**PostgreSQL over H2 for development** - running a real database locally
+rather than an in-memory one means the development environment more closely
+reflects production. H2 is used only for tests.
+
+**Spring Boot 4.0.3** - chose the latest major version to demonstrate awareness of the current ecosystem and willingness to work on the cutting edge, including navigating the modularized test infrastructure changes introduced in 4.x.
+
+---
+
+## Future Improvements
+
+The following stories are planned and tracked on the project board:
+
+- **Authentication and Authorization** - secure all endpoints with JWT
+- **Search notes** - `GET /notes?query=` full text search
+- **Pagination** - limit and offset support on `GET /notes`
+- **Filter by date** - retrieve notes created within a date range
+- **Structured logging** - JSON formatted logs for production observability
+- **React frontend** - a simple UI for interacting with the API
+- **CI/CD pipeline** - GitHub Actions for automated test and build on push
+
+---
+
+## Project Structure
+```
+notes-vault-api/
+├── docs/
+│   └── architecture.png
+├── scripts/
+│   └── setup-docker.sh
+├── src/
+│   ├── main/
+│   │   ├── java/com/bluestaq/notesvault/
+│   │   │   ├── controller/    # NoteController
+│   │   │   ├── exception/     # GlobalExceptionHandler, NoteNotFoundException
+│   │   │   ├── model/         # Note, ErrorResponse
+│   │   │   ├── repository/    # NoteRepository
+│   │   │   └── service/       # NoteService
+│   │   └── resources/
+│   │       └── application.properties
+│   └── test/
+│       ├── java/com/bluestaq/notesvault/
+│       │   ├── NoteControllerTest.java
+│       │   └── NoteServiceTest.java
+│       └── resources/
+│           └── application.properties
+├── Dockerfile
+├── docker-compose.yml
+└── pom.xml
+```
