@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/notes")
@@ -19,10 +20,7 @@ public class NoteController {
     }
 
     @PostMapping
-    public ResponseEntity<Note> createNote(@RequestBody Note note) {
-        if (note.getContent() == null || note.getContent().isBlank()) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<Note> createNote(@Valid @RequestBody Note note) {
         Note created = noteService.createNote(note);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
