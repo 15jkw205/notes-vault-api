@@ -38,4 +38,10 @@ public class NoteController {
         Note note = noteService.getNoteById(id);
         return ResponseEntity.ok(note);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNote(@PathVariable UUID id) {
+        noteService.deleteNote(id);
+        return ResponseEntity.noContent().build();
+    }
 }
