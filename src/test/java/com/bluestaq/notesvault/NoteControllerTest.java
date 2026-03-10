@@ -1,7 +1,14 @@
 package com.bluestaq.notesvault;
 
-import com.bluestaq.notesvault.model.Note;
-import com.bluestaq.notesvault.repository.NoteRepository;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +16,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import java.util.UUID;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import com.bluestaq.notesvault.model.Note;
+import com.bluestaq.notesvault.repository.NoteRepository;
 
 /**
  * API level tests for NoteController.
@@ -110,6 +117,34 @@ class NoteControllerTest {
     @Test
     void deleteNote_notFound_shouldReturn404() throws Exception {
         mockMvc.perform(delete("/notes/" + UUID.randomUUID()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    // PUT /notes/{id} — valid ID should return 200 OK with updated content
+    @Test
+    void updateNote_shouldReturn200() throws Exception {
+        Note note = new Note();
+        note.setContent("Original content");
+        Note saved = noteRepository.save(note);
+
+        String body = "{\"content\": \"Updated content\"}";
+
+        mockMvc.perform(put("/notes/" + saved.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").value("Updated content"));
+    }
+
+    // PUT /notes/{id} — non-existent ID should return 404 Not Found
+    @Test
+    void updateNote_notFound_shouldReturn404() throws Exception {
+        String body = "{\"content\": \"Updated content\"}";
+
+        mockMvc.perform(put("/notes/" + UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404));
     }

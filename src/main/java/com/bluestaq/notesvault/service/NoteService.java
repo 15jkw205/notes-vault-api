@@ -46,4 +46,13 @@ public class NoteService {
         }
         noteRepository.deleteById(id);
     }
+
+    // Updates an existing note by ID — throws NoteNotFoundException if not found
+    public Note updateNote(UUID id, Note updatedNote) {
+        Note existing = noteRepository.findById(id)
+                .orElseThrow(() -> new NoteNotFoundException(
+                        "Note not found with id: " + id));
+        existing.setContent(updatedNote.getContent());
+        return noteRepository.save(existing);
+    }
 }
