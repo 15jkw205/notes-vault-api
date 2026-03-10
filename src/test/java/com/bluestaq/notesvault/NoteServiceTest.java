@@ -1,21 +1,30 @@
 package com.bluestaq.notesvault;
 
-import com.bluestaq.notesvault.exception.NoteNotFoundException;
-import com.bluestaq.notesvault.model.Note;
-import com.bluestaq.notesvault.repository.NoteRepository;
-import com.bluestaq.notesvault.service.NoteService;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.bluestaq.notesvault.exception.NoteNotFoundException;
+import com.bluestaq.notesvault.model.Note;
+import com.bluestaq.notesvault.repository.NoteRepository;
+import com.bluestaq.notesvault.service.NoteService;
 
 /**
  * Service layer tests for NoteService.
@@ -119,5 +128,41 @@ class NoteServiceTest {
                 () -> noteService.deleteNote(id));
         verify(noteRepository, times(1)).existsById(id);
         verify(noteRepository, never()).deleteById(id);
+    }
+
+    // updateNote — should update content and return the updated note
+    @Test
+    void updateNote_shouldUpdateAndReturnNote() {
+        UUID id = UUID.randomUUID();
+        Note existing = new Note();
+        existing.setContent("Original content");
+
+        Note updatedNote = new Note();
+        updatedNote.setContent("Updated content");
+
+        when(noteRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(noteRepository.save(existing)).thenReturn(existing);
+
+        Note result = noteService.updateNote(id, updatedNote);
+
+        assertNotNull(result);
+        assertEquals("Updated content", result.getContent());
+        verify(noteRepository, times(1)).findById(id);
+        verify(noteRepository, times(1)).save(existing);
+    }
+
+    // updateNote — should throw NoteNotFoundException when note does not exist
+    @Test
+    void updateNote_shouldThrowExceptionWhenNotFound() {
+        UUID id = UUID.randomUUID();
+        Note updatedNote = new Note();
+        updatedNote.setContent("Updated content");
+
+        when(noteRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(NoteNotFoundException.class,
+                () -> noteService.updateNote(id, updatedNote));
+        verify(noteRepository, times(1)).findById(id);
+        verify(noteRepository, never()).save(any());
     }
 }

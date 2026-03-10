@@ -52,4 +52,13 @@ public class NoteController {
         noteService.deleteNote(id);
         return ResponseEntity.noContent().build();
     }
+
+    // PUT /notes/{id} — updates an existing note, returns 200 OK or 404
+    @PutMapping("/{id}")
+    public ResponseEntity<Note> updateNote(
+            @PathVariable UUID id,
+            @Valid @RequestBody Note note) {
+        Note updated = noteService.updateNote(id, note);
+        return ResponseEntity.ok(updated);
+    }
 }
