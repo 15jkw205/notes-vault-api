@@ -27,4 +27,11 @@ public class NoteService {
         return noteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Note not found with id: " + id));
     }
+
+    public void deleteNote(UUID id) {
+    if (!noteRepository.existsById(id)) {
+        throw new RuntimeException("Note not found with id: " + id);
+    }
+    noteRepository.deleteById(id);
+    }
 }
